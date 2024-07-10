@@ -1,28 +1,12 @@
 <!DOCTYPE html>
 
-<!-- Hack or Snooze
-
-     This is the only HTML page; the applications manipulates this DOM
-     during use.
-
-     Primary authors:
-     - Michael Hueter: initial creation, 2018
-     - Elie Schoppik: refactoring using OO, 2019
-     - Joel Burton: refactored and componentized, 2020
-     - You!
-  -->
-
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Hack or Snooze</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" 
-      rel="stylesheet" 
-      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" 
-      crossorigin="anonymous">
+  <title>Hack or Snooze News App</title>
   <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
@@ -36,71 +20,64 @@
 
 <body>
 
-<!-- top navigation bar -->
+<!-- Top Navigation Menu -->
 <nav>
   <div class="navbar-brand">
-    <a class="nav-link" href="#" id="nav-all">Hack or Snooze</a>
+    <a class="nav-link" href="#" id="nav-all">Hack or Snooze News App</a>
   </div>
-
-  <!-- **********added user navigation bar*************** -->
-  <div class="main-nav-links hidden">
-    | <a class="nav-link" href="#" id="nav-submit-story">Submit</a> 
-    | <a class="nav-link" href="#" id="nav-favorites">Favorites</a> 
-    | <a class="nav-link" href="#" id="nav-my-stories">My&nbsp;Stories</a>
+  <div class="top-nav-links hidden">
+    |    <a class="nav-link" href="#" id="nav-submit-story">Add Story</a>
+    |    <a class="nav-link" href="#" id="nav-favorites">Favorites</a>
+    |    <a class="nav-link" href="#" id="nav-my-stories">My&nbsp;Stories</a>
   </div>
-
-
   <div class="nav-right">
-    <a class="nav-link" href="#" id="nav-login">login/signup</a>
+    <a class="nav-link" href="#" id="nav-login">Login/Signup</a>
     <a class="nav-link" href="#" id="nav-user-profile"></a>
     <a class="hidden" id="nav-logout" href="#"><small>(logout)</small></a>
   </div>
 </nav>
 
-<!-- area for stories (all stories, user stories, favorites) -->
-<section class="stories-container container">
+<!-- Area for List of Stories -->
+<section id="story-container" class="story-container container">
 
-  <!-- ***********added form for submitted new story************ -->
+  <!-- New Story Submission Form -->
   <form action="" class="hidden" id="submit-form">
     <div>
-      <label for="add-author">Author</label>
-      <input id="add-author" required placeholder="Author's Name">
+      <label for="create-author">Author</label>
+      <input id="create-author" required placeholder="author name">
     </div>
     <div>
-      <label for="add-title">Title</label>
-      <input id="add-title" required placeholder="Story Title">
+      <label for="create-title">Story Title</label>
+      <input id="create-title" required placeholder="story title">
     </div>
     <div>
-      <label for="add-url">Url</label>
-      <input id="add-url" required type="url" placeholder="Story Url">
+      <label for="create-url">Story Url</label>
+      <input id="create-url" required type="url" placeholder="story url">
     </div>
-    <button type="submit">Submit</button>
+    <button type="submit">Add Story</button>
     <hr>
   </form>
 
+  <!-- Loading Message -->
+  <div id="stories-loading-msg">Page is Loading&hellip;</div>
 
-  <!-- loading message (removed by JS after stories loaded) -->
-  <div id="stories-loading-msg">Loading&hellip;</div>
-
-  <!-- List of all stories -->
+  <!-- List of All Stories -->
   <ol id="all-stories-list" class="stories-list"></ol>
 
-  <!-- **************** added *****************************-->
-  <!-- List of favorite stories noted by the user -->
-  <ol id="favorite-stories" class="hidden stories-list"></ol>
+  <!-- List of Favorit Stories -->
+  <ol id="favorited-stories" class="hidden stories-list"></ol>
 
-  <!-- List of all stories created by the user -->
+  <!-- List of User-submitted Stories -->
   <ol id="my-stories" class="hidden stories-list"></ol>
-  <!-- ****************************************************-->
 
 </section>
 
-<!-- Login and signup forms -->
+<!-- Login and Signup Forms -->
 <section class="account-forms-container container">
 
-  <!-- Login form -->
+  <!-- Login Form -->
   <form action="#" id="login-form" class="account-form hidden" method="post">
-    <h4>Login</h4>
+    <h4>Login Form</h4>
     <div class="login-input">
       <label for="login-username">Username</label>
       <input id="login-username" autocomplete="current-username">
@@ -113,13 +90,13 @@
     <hr>
   </form>
 
-  <!-- Signup form -->
+  <!-- Signup Form -->
   <form
       action="#"
       id="signup-form"
       class="account-form hidden"
       method="post">
-    <h4>Create Account</h4>
+    <h4>Create New Account</h4>
     <div class="login-input">
       <label for="signup-name">Name</label>
       <input id="signup-name" autocapitalize="words">
@@ -132,14 +109,13 @@
       <label for="signup-password">Password</label>
       <input id="signup-password" autocomplete="new-password" type="password">
     </div>
-    <button type="submit">Create Account</button>
+    <button type="submit">Create New Account</button>
   </form>
 </section>
 
-<!-- *********************** added *************************** -->
-<!-- User profile -->
+<!-- User Profile -->
 <section id="user-profile" class="hidden">
-  <div class="user-profile-box container">
+  <div class="user-profile-container container">
     <h4>User Profile</h4>
     <section>
       <div>Name: <span id="profile-name">Name:</span></div>
@@ -148,14 +124,10 @@
     </section>
   </div>
 </section>
-<!-- ********************************************************* -->
 
-<!-- Library JS & our JS -->
+<!-- Libraries -->
 <script src="https://unpkg.com/jquery"></script>
 <script src="https://unpkg.com/axios/dist/axios.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" 
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" 
-        crossorigin="anonymous"></script>
 <script src="js/models.js"></script>
 <script src="js/main.js"></script>
 <script src="js/nav.js"></script>
