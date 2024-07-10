@@ -1,5 +1,4 @@
-/* Lists of stories */
-
+/* Lists of Stories */
 .stories-list {
   margin: 20px 5px;
 }
@@ -8,9 +7,14 @@
   color: gray;
   font-size: 0.8rem;
   margin: 10px 0;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #cfcfcf;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #fc7702e3;
+}
 
+#favorited-stories,
+#my-stories {
+  list-style: none;
+  padding-left: 20px;
 }
 
 #stories-loading-msg {
@@ -19,18 +23,12 @@
   margin: 20px 30px;
 }
 
-#favorite-stories,
-#my-stories {
-  padding-left: 25px;
-  list-style: none;
-}
 
-/* Individual stories */
-
+/* Story List Items */
 .story-link {
   color: black;
   font-size: 0.85rem;
-  font-weight: bold;
+  font-weight: normal;
   margin: 18px 0;
 }
 
@@ -39,15 +37,26 @@
 }
 
 .story-author {
-  display: block;
-  
-  color: rgb(8, 153, 127);
-  font-size: 0.8rem;
-  padding: 5px 0;
+  margin-left: 2em;
+  font-size: 0.85rem;
+  color: rgb(8, 74, 154);
+  padding: 6px 0;
 }
 
 .story-user {
   display: block;
-  color: rgb(237, 101, 5);
-  font-size: 0.8rem;
+  margin-left: 2em;
+  font-size: 0.85rem;
+  color: rgb(195, 109, 3);
+}
+
+.star,
+.trash-can {
+  margin: 0 5px;
+  font-size: .7rem;
+  cursor: pointer;
+}
+
+.trash-can:hover {
+  color: rgb(248, 110, 138);
 }

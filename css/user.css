@@ -1,5 +1,4 @@
-/* Login and signup forms */
-
+/* Login and Signup Forms */
 .account-form button {
   width: 4rem;
   margin-left: 80px;
@@ -12,3 +11,11 @@
 .account-forms-container {
   padding-left: 20px;
 }
+
+
+/* User Profile Information */
+.user-profile-container {
+  padding: 10px 20px 20px;
+  font-size: 0.9rem;
+}
+
