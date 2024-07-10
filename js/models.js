@@ -1,7 +1,5 @@
 "use strict";
 
-// const { default: axios } = require("axios");
-
 const BASE_URL = "https://hack-or-snooze-v3.herokuapp.com";
 
 /******************************************************************************
@@ -11,7 +9,7 @@ const BASE_URL = "https://hack-or-snooze-v3.herokuapp.com";
 class Story {
 
   /** Make instance of Story from data object about story:
-   *   - {title, author, url, username, storyId, createdAt}
+   *   - {storyId, title, author, url, username, createdAt}
    */
 
   constructor({ storyId, title, author, url, username, createdAt }) {
@@ -26,10 +24,8 @@ class Story {
   /** Parses hostname out of URL and returns it. */
 
   getHostName() {
-    // UNIMPLEMENTED: complete this function!
-
-    // return the main URL (For example, without the extra "https://"" or path after ".com/"
-    return new URL(this.url).host;
+  // Return the main URL (For example, without the extra "https://"" or path after ".com/"
+    return new URL(this.url).hostname;
   }
 }
 
@@ -58,15 +54,15 @@ class StoryList {
     //  instance method?
 
     // query the /stories endpoint (no auth required)
-    const response = await axios({
+    const {data} = await axios({
       url: `${BASE_URL}/stories`,
       method: "GET",
     });
 
     // turn plain old story objects from API into instances of Story class
-    const stories = response.data.stories.map(story => new Story(story));
+    const stories = data.stories.map(story => new Story(story));
 
-    // build an instance of our my class using the new array of stories
+    // build an instance of our own class using the new array of stories
     return new StoryList(stories);
   }
 
@@ -74,43 +70,60 @@ class StoryList {
    * - user - the current instance of User who will post the story
    * - obj of {title, author, url}
    *
-   * Returns the new Story instance 
-   
-   ************************* My addStory Funtion ******************************
-     Must use this format to invoke the function:
-   
-     let newStory = await storyList.addStory(currentUser,
-     {title: "Test", author: "Me", url: "http://meow.com"});
-
-     returns as instance of a Story class
-     newStory instanceof Story; // should be true!
+   * Returns the new Story instance
    */
 
-  async addStory(user, {title, author, url}) {
-    // UNIMPLEMENTED: complete this function!
-    
-    // Declare a token variable for the user's login token.
-    const token = user.loginToken;
+/************************* My addStory Funtion ******************************
+  Must use this format to invoke the function:
 
-    // Declare the response variable and post/send new story data to the server.
-    const response = await axios({
+  let newStory = await storyList.addStory(currentUser,
+  {title: "Test", author: "Me", url: "http://meow.com"});
+
+  returns as instance of a Story class
+  newStory instanceof Story; // should be true!
+*/
+  async addStory(user, { title, author, url }) {
+    const {data} = await axios({
       method: "POST",
-      url:`${BASE_URL}/stories`,
-      data: {token, story:{title, author, url}},
+      url: `${BASE_URL}/stories`,
+      data: { token: user.loginToken, story: { title, author, url } },
     });
 
-    // Add the new story to the end of the "stories" and "myStories" arrays.
-    const story = new Story(response.data.story);
-    this.stories.push(story); 
-    user.myStories.push(story);
+    const story = new Story(data.story);
+    this.stories.unshift(story);
+    user.ownStories.unshift(story);
 
     return story;
   }
+
+  /** Delete story from API and remove from the story lists.
+   *
+   * - user: the current User instance
+   * - storyId: the ID of the story you want to remove
+   */
+
+  async removeStory(user, storyId) {
+    await axios({
+      url: `${BASE_URL}/stories/${storyId}`,
+      method: "DELETE",
+      data: { token: user.loginToken }
+    });
+
+    // Removes story with a specific storyId from the stories array by filtering out the story with a matching storyId.
+    this.stories = this.stories.filter(story => story.storyId !== storyId);
+    user.ownStories = user.ownStories.filter(s => s.storyId !== storyId);
+    user.favorites = user.favorites.filter(s => s.storyId !== storyId);
+  }
 }
 
+
+/******************************************************************************
+ * User: a user in the system (only used to represent the current user)
+ */
+
 class User {
-  /* Make user instance from obj of user data and a token:
-   *   - {username, name, createdAt, favorites[], myStories[]}
+  /** Make user instance from obj of user data and a token:
+   *   - {username, name, createdAt, favorites[], ownStories[]}
    *   - token
    */
 
@@ -119,21 +132,20 @@ class User {
                 name,
                 createdAt,
                 favorites = [],
-                myStories = []
+                ownStories = []
               },
               token) {
     this.username = username;
     this.name = name;
     this.createdAt = createdAt;
 
-    // instantiate Story instances for the user's favorites and myStories
+    // Assign new arrays to the favorites and ownStories properties
     this.favorites = favorites.map(s => new Story(s));
-    this.myStories = myStories.map(s => new Story(s));
+    this.ownStories = ownStories.map(s => new Story(s));
 
-    // store the login token on the user so it's easy to find for API calls.
+    // Store the login token for the user so it's easier to find for API calls.
     this.loginToken = token;
   }
-
 
   /** Register new user in API, make User instance & return it.
    *
@@ -143,13 +155,13 @@ class User {
    */
 
   static async signup(username, password, name) {
-    const response = await axios({
+    const {data} = await axios({
       url: `${BASE_URL}/signup`,
       method: "POST",
       data: { user: { username, password, name } },
     });
 
-    let { user } = response.data;
+    let { user } = data;
 
     return new User(
       {
@@ -157,9 +169,9 @@ class User {
         name: user.name,
         createdAt: user.createdAt,
         favorites: user.favorites,
-        myStories: user.stories
+        ownStories: user.stories
       },
-      response.data.token
+      data.token
     );
   }
 
@@ -170,7 +182,7 @@ class User {
    */
 
   static async login(username, password) {
-    const response = await axios({
+    const {data} = await axios({
       url: `${BASE_URL}/login`,
       method: "POST",
       data: { user: { username, password } },
@@ -184,9 +196,9 @@ class User {
         name: user.name,
         createdAt: user.createdAt,
         favorites: user.favorites,
-        myStories: user.stories
+        ownStories: user.stories
       },
-      response.data.token
+      data.token
     );
   }
 
@@ -196,13 +208,13 @@ class User {
 
   static async loginViaStoredCredentials(token, username) {
     try {
-      const response = await axios({
+      const {data} = await axios({
         url: `${BASE_URL}/users/${username}`,
         method: "GET",
         params: { token },
       });
 
-      let { user } = response.data;
+      let { user } = data;
 
       return new User(
         {
@@ -210,7 +222,7 @@ class User {
           name: user.name,
           createdAt: user.createdAt,
           favorites: user.favorites,
-          myStories: user.stories
+          ownStories: user.stories
         },
         token
       );
@@ -220,7 +232,10 @@ class User {
     }
   }
 
-  /* ***********************added function ***************** */
+  /** Add a story to the list of user favorites and update the API
+   * - story: a Story instance to add to favorites
+   */
+
   async addFavorite(story) {
     this.favorites.push(story);
     await this._addOrRemoveFavorite("add", story)
@@ -231,7 +246,9 @@ class User {
    */
 
   async removeFavorite(story) {
+    // Create a new array of favorites that don't match the story ID
     this.favorites = this.favorites.filter(s => s.storyId !== story.storyId);
+    // Assign the new array back to the favorites property, omitting the specified story.
     await this._addOrRemoveFavorite("remove", story);
   }
 
@@ -256,4 +273,3 @@ class User {
     return this.favorites.some(s => (s.storyId === story.storyId));
   }
 }
-
